@@ -1,24 +1,26 @@
-# render.yaml ─ Blueprint definition
+# render.yaml ─ BiteSpeed Identity Blueprint
 databases:
-  - name: bitespeed-db              # free Postgres instance
+  - name: bitespeed-db          # free Postgres instance
     plan: free
 
 services:
   - type: web
     name: bitespeed-api
-    env: docker                     # use Dockerfile
+    env: docker
     plan: free
+
     dockerfilePath: ./Dockerfile
     dockerContext: .
     autoDeploy: true
 
-    # health-check → Express /metrics endpoint
+    # Health-check hits Express /metrics
     healthCheckPath: /metrics
 
     envVars:
-      # DATABASE_URL comes directly from the database
-      - fromDatabase:
-          name: DATABASE_URL
+      # Inject DATABASE_URL from the database above
+      - key: DATABASE_URL
+        fromDatabase:
+          name: bitespeed-db
           property: connectionString
 
       # Same defaults as .env.example
