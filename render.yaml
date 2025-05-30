@@ -1,0 +1,32 @@
+# render.yaml ─ Blueprint definition
+databases:
+  - name: bitespeed-db              # free Postgres instance
+    plan: free
+
+services:
+  - type: web
+    name: bitespeed-api
+    env: docker                     # use Dockerfile
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    autoDeploy: true
+
+    # health-check → Express /metrics endpoint
+    healthCheckPath: /metrics
+
+    envVars:
+      # DATABASE_URL comes directly from the database
+      - fromDatabase:
+          name: DATABASE_URL
+          property: connectionString
+
+      # Same defaults as .env.example
+      - key: AI_URL_SIMILAR
+        value: http://ai-service:8000/similar
+
+      - key: PORT
+        value: 3000
+
+      - key: LOG_LEVEL
+        value: info
