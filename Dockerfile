@@ -9,7 +9,6 @@ RUN npm ci
 # 2. generate linux-musl Prisma client
 COPY prisma ./prisma
 RUN npx prisma generate
-RUN npx prisma db push
 
 # 3. compile TS
 COPY src ./src
@@ -28,4 +27,5 @@ COPY --from=build /app/package.json ./package.json
 COPY prisma ./prisma
 
 EXPOSE 3000
-CMD ["node","dist/index.js"]
+CMD ["sh","-c","npx prisma db push && node dist/index.js"]
+
