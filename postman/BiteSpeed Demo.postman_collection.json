@@ -1,0 +1,36 @@
+{
+  "info": {
+    "name": "BiteSpeed Demo",
+    "_postman_id": "2345-6789",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "New primary",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": { "raw": "http://localhost:3000/identify", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["identify"] },
+        "body": { "mode": "raw", "raw": "{\n  \"email\": \"doc@brown.com\"\n}" }
+      }
+    },
+    {
+      "name": "Link via phone",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": { "raw": "http://localhost:3000/identify", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["identify"] },
+        "body": { "mode": "raw", "raw": "{\n  \"phoneNumber\": \"123456\"\n}" }
+      }
+    },
+    {
+      "name": "Fuzzy e-mail match",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": { "raw": "http://localhost:3000/identify", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["identify"] },
+        "body": { "mode": "raw", "raw": "{\n  \"email\": \"lorrane@hillvalley.edu\"\n}" }
+      }
+    }
+  ]
+}
