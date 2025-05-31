@@ -26,7 +26,7 @@ This micro-service exposes a single **`POST /identify`** endpoint which:
 
 ```bash
 # clone & run
-git clone https://github.com/<your-user>/bitespeed-identity-reconciliation.git
+git clone https://github.com/SaiBhujbal/bitespeed-identity-reconciliation.git
 cd bitespeed-identity-reconciliation
 cp .env.example .env                    # adjust if you like, defaults work
 docker compose up -d                    # api:3000  db:5432  ai:8000
