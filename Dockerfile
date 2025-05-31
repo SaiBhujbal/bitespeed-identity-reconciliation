@@ -4,17 +4,20 @@
 FROM node:18-alpine AS build
 WORKDIR /app
 
-# 1-A  install production-only deps (keeps final image slim)
+# 1-A  install *all* dependencies (prod + dev)
 COPY package*.json tsconfig.json ./
-RUN npm ci --omit=dev
+RUN npm ci
 
-# 1-B  generate Prisma client – no DB access needed
+# 1-B  generate Prisma client
 COPY prisma ./prisma
 RUN npx prisma generate
 
-# 1-C  transpile TypeScript → dist/
+# 1-C  transpile TypeScript
 COPY src ./src
-RUN npm run build          # "build": "node ./node_modules/typescript/lib/tsc.js"
+RUN npm run build                    # runs `tsc`
+
+# 1-D  remove devDeps so runtime is slim
+RUN npm prune --production
 
 ########################
 # 2. Runtime stage
@@ -24,15 +27,12 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3000
 
-# 2-A  copy only what the server needs
+# copy pruned prod deps + compiled code + schema
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/dist         ./dist
-COPY --from=build /app/prisma       ./prisma   # ← uses the already-verified copy
+COPY --from=build /app/prisma       ./prisma
 COPY package.json ./package.json
 
 EXPOSE 3000
 
-# 2-B  At start-time:
-#      1. push/upgrade schema (DATABASE_URL is now present)
-#      2. launch the API
 CMD ["sh","-c","npx prisma db push && node dist/index.js"]
