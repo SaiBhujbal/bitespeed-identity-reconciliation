@@ -1,31 +1,35 @@
-##################  BUILD  ##################
+########################
+# 1️⃣ Build stage
+########################
 FROM node:18-alpine AS build
 WORKDIR /app
 
-# 1. install deps
+# 1. Install dependencies
 COPY package*.json tsconfig.json ./
 RUN npm ci
 
-# 2. generate linux-musl Prisma client
+# 2. Prisma client (no DB access needed)
 COPY prisma ./prisma
 RUN npx prisma generate
 
-# 3. compile TS
+# 3. Compile TypeScript
 COPY src ./src
-RUN npm run build          # assumes "build": "node ./node_modules/typescript/lib/tsc.js"
+RUN npm run build                 # "build": "node ./node_modules/typescript/lib/tsc.js"
 
-##################  RUNTIME ##################
+########################
+# 2️⃣ Runtime stage
+########################
 FROM node:18-alpine
 WORKDIR /app
-
 ENV NODE_ENV=production
 
-# copy runtime deps + Prisma client
+# copy only what we need
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/dist         ./dist
-COPY --from=build /app/package.json ./package.json
-COPY prisma ./prisma
+COPY prisma ./prisma                # keep schema for db push
+COPY package.json ./package.json
 
 EXPOSE 3000
-CMD ["sh","-c","npx prisma db push && node dist/index.js"]
 
+# 🛠️  runtime: create/update tables, then start API
+CMD ["sh","-c","npx prisma db push && node dist/index.js"]
