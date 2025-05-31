@@ -1,35 +1,38 @@
 ########################
-# 1️⃣ Build stage
+# 1. Build stage
 ########################
 FROM node:18-alpine AS build
 WORKDIR /app
 
-# 1. Install dependencies
+# 1-A  install production-only deps (keeps final image slim)
 COPY package*.json tsconfig.json ./
-RUN npm ci
+RUN npm ci --omit=dev
 
-# 2. Prisma client (no DB access needed)
+# 1-B  generate Prisma client – no DB access needed
 COPY prisma ./prisma
 RUN npx prisma generate
 
-# 3. Compile TypeScript
+# 1-C  transpile TypeScript → dist/
 COPY src ./src
-RUN npm run build                 # "build": "node ./node_modules/typescript/lib/tsc.js"
+RUN npm run build          # "build": "node ./node_modules/typescript/lib/tsc.js"
 
 ########################
-# 2️⃣ Runtime stage
+# 2. Runtime stage
 ########################
 FROM node:18-alpine
 WORKDIR /app
 ENV NODE_ENV=production
+ENV PORT=3000
 
-# copy only what we need
+# 2-A  copy only what the server needs
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/dist         ./dist
-COPY prisma ./prisma                # keep schema for db push
+COPY --from=build /app/prisma       ./prisma   # ← uses the already-verified copy
 COPY package.json ./package.json
 
 EXPOSE 3000
 
-# 🛠️  runtime: create/update tables, then start API
+# 2-B  At start-time:
+#      1. push/upgrade schema (DATABASE_URL is now present)
+#      2. launch the API
 CMD ["sh","-c","npx prisma db push && node dist/index.js"]
