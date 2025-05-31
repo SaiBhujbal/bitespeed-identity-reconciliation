@@ -152,7 +152,7 @@ Coverage: 100 % on the reconciliation service.
    `/metrics`, and your service is live at
 
    ```
-   https://bitespeed-demo.onrender.com/identify
+   POST https://bitespeed-api-vfyh.onrender.com/identify
    ```
 
 ---
